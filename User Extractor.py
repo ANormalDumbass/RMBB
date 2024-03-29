@@ -1,7 +1,5 @@
+import json
 import requests
-# Roblox Moderation But Better (User Extracting)
-# By: @ANormalDumbass
-# Disc: 96_
 
 def extract_all_members(group_id):
     url = f"https://groups.roblox.com/v1/groups/{group_id}/users?sortOrder=Asc&limit=100"
@@ -31,6 +29,9 @@ def extract_all_members(group_id):
 
             all_members.extend(members_info)
 
+            # Save member info to file after every successful request
+            save_member_info_to_file(members_info, f"group_{group_id}_members_partial.json")
+
             # Get the next page cursor
             next_page_cursor = member_data.get('nextPageCursor')
             if next_page_cursor:
@@ -45,12 +46,9 @@ def extract_all_members(group_id):
     return all_members
 
 def save_member_info_to_file(members_info, filename):
-    with open(filename, 'w', encoding='utf-8') as file:
-        for member_info in members_info:
-            file.write(f"User ID: {member_info['userId']}\n")
-            file.write(f"Username: {member_info['username']}\n")
-            file.write(f"Display Name: {member_info['displayName']}\n")
-
+    with open(filename, 'a', encoding='utf-8') as file:  # Append mode to avoid overwriting
+        json.dump(members_info, file, indent=4)  # Save members_info in JSON format
+        file.write('\n')  # Add a newline for readability between each request's data
 
 if __name__ == "__main__":
     group_id = input("Enter the Roblox group ID: ")
@@ -64,6 +62,6 @@ if __name__ == "__main__":
             print(f"Display Name: {member_info['displayName']}")
             print()  # Print an empty line for readability
 
-        filename = f"group_{group_id}_members.txt"
+        filename = f"group_{group_id}_members.json"  # Change file extension to .json
         save_member_info_to_file(members_info, filename)
         print(f"Member information saved to {filename}")
